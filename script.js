@@ -22,16 +22,17 @@ const datePickerDates = document.querySelector('.date-picker-grid-dates');
 const monthFormat = 'MMMM - yyyy';
 
 // Set the current date
-let selectedDate = new Date();
+let currentDate = new Date();
+let selectedDate = currentDate;
 let currentMonth;
 
 // FUNCTIONS
-function displayDateOnButton(selectedDate) {
-  datePickerButton.textContent = format(selectedDate, 'MMMM do, yyyy');
+function displayDateOnButton(currentDate) {
+  datePickerButton.textContent = format(currentDate, 'MMMM do, yyyy');
 }
 
-function getMonth(selectedDate) {
-  currentMonth = format(selectedDate, monthFormat);
+function getMonth(currentDate) {
+  currentMonth = format(currentDate, monthFormat);
 }
 
 function displayMonth(currentMonth) {
@@ -40,15 +41,15 @@ function displayMonth(currentMonth) {
 
 function getPreviousMonth() {
   // Update the current month by subtracting 1 month
-  selectedDate = subMonths(selectedDate, 1);
-  getMonth(selectedDate);
+  currentDate = subMonths(currentDate, 1);
+  getMonth(currentDate);
   displayMonth(currentMonth);
 }
 
 function getNextMonth() {
   // Update the current month by adding 1 month
-  selectedDate = addMonths(selectedDate, 1);
-  getMonth(selectedDate);
+  currentDate = addMonths(currentDate, 1);
+  getMonth(currentDate);
   displayMonth(currentMonth);
 }
 
@@ -57,16 +58,16 @@ function fillInDays() {
   datePickerDates.innerHTML = '';
 
   // When the week of the first day of the month begins
-  const firstWeekStart = startOfWeek(startOfMonth(selectedDate));
+  const firstWeekStart = startOfWeek(startOfMonth(currentDate));
   // When the week of the last day of the month ends
-  const lastWeekEnd = endOfWeek(endOfMonth(selectedDate));
+  const lastWeekEnd = endOfWeek(endOfMonth(currentDate));
   const dates = eachDayOfInterval({ start: firstWeekStart, end: lastWeekEnd });
 
   dates.forEach(date => {
     const dateButton = document.createElement('button');
     dateButton.classList.add('date');
     dateButton.textContent = date.getDate();
-    if (!isSameMonth(date, selectedDate)) {
+    if (!isSameMonth(date, currentDate)) {
       dateButton.classList.add('date-picker-other-month-date');
     }
     if (isSameDay(date, selectedDate)) {
@@ -81,7 +82,7 @@ function fillInDays() {
     datePickerDates.appendChild(dateButton);
   });
   displayDateOnButton(selectedDate);
-  getMonth(selectedDate);
+  getMonth(currentDate);
   displayMonth(currentMonth);
 }
 
@@ -94,6 +95,7 @@ datePickerButton.addEventListener('click', () => {
 prevMonthButton.addEventListener('click', () => {
   // Get the previous month when clicked
   getPreviousMonth();
+  selectedDate = '';
   // Fill the days of the previous month
   fillInDays();
 });
@@ -101,6 +103,7 @@ prevMonthButton.addEventListener('click', () => {
 nextMonthButton.addEventListener('click', () => {
   // Get the next month when clicked
   getNextMonth();
+  selectedDate = '';
   // Fill the days of the next month
   fillInDays();
 });
