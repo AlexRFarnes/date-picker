@@ -18,8 +18,8 @@ Practice the use of parcel bundler and an external library to bundle it. Use the
 
 ## Screenshots
 
-![Example screenshot](./images/screenshot.png)
-[Demo]()
+![Screenshot_2021-05-19 Date Picker](https://user-images.githubusercontent.com/57517804/118770271-b5948b80-b8b3-11eb-8be3-02f59d1e257b.png)
+[Demo](https://angry-swanson-812fc7.netlify.app/)
 
 ## Technologies
 
