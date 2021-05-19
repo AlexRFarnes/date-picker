@@ -77,6 +77,7 @@ function fillInDays() {
     dateButton.addEventListener('click', () => {
       selectedDate = date;
       datePickerEl.classList.remove('show');
+      currentDate = selectedDate;
       fillInDays();
     });
     datePickerDates.appendChild(dateButton);
