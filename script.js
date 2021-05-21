@@ -1,5 +1,7 @@
 import {
   format,
+  getUnixTime,
+  fromUnixTime,
   subMonths,
   addMonths,
   startOfMonth,
@@ -7,107 +9,78 @@ import {
   startOfWeek,
   endOfWeek,
   eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
 } from 'date-fns';
-import isSameDay from 'date-fns/isSameDay';
-import isSameMonth from 'date-fns/isSameMonth';
 
-// DOM elements
 const datePickerButton = document.querySelector('.date-picker-button');
-const datePickerEl = document.querySelector('.date-picker');
-const currentMonthEl = document.querySelector('.current-month');
+const datePicker = document.querySelector('.date-picker');
+const datePickerHeaderText = document.querySelector('.current-month');
 const prevMonthButton = document.querySelector('.prev-month-button');
 const nextMonthButton = document.querySelector('.next-month-button');
-const datePickerDates = document.querySelector('.date-picker-grid-dates');
+const datePickerGridDates = document.querySelector('.date-picker-grid-dates ');
+let currentDate;
 
-const monthFormat = 'MMMM - yyyy';
-
-// Set the current date
-let currentDate = new Date();
-let selectedDate = currentDate;
-let currentMonth;
-
-// FUNCTIONS
-function displayDateOnButton(currentDate) {
-  datePickerButton.textContent = format(currentDate, 'MMMM do, yyyy');
+function setDate(date) {
+  datePickerButton.textContent = format(date, 'MMMM do, yyyy');
+  datePickerButton.dataset.selectedDate = getUnixTime(date);
 }
 
-function getMonth(currentDate) {
-  currentMonth = format(currentDate, monthFormat);
+function setupDatePicker(selectedDate) {
+  datePickerHeaderText.textContent = format(currentDate, 'MMMM - yyyy');
+  setDaysInCalendar(selectedDate);
 }
 
-function displayMonth(currentMonth) {
-  currentMonthEl.textContent = currentMonth;
-}
-
-function getPreviousMonth() {
-  // Update the current month by subtracting 1 month
-  currentDate = subMonths(currentDate, 1);
-  getMonth(currentDate);
-  displayMonth(currentMonth);
-}
-
-function getNextMonth() {
-  // Update the current month by adding 1 month
-  currentDate = addMonths(currentDate, 1);
-  getMonth(currentDate);
-  displayMonth(currentMonth);
-}
-
-function fillInDays() {
-  // Remove all the html from the date picker before filling in the new days
-  datePickerDates.innerHTML = '';
-
-  // When the week of the first day of the month begins
-  const firstWeekStart = startOfWeek(startOfMonth(currentDate));
-  // When the week of the last day of the month ends
-  const lastWeekEnd = endOfWeek(endOfMonth(currentDate));
-  const dates = eachDayOfInterval({ start: firstWeekStart, end: lastWeekEnd });
+function setDaysInCalendar(selectedDate) {
+  datePickerGridDates.innerHTML = '';
+  const firstWeekOfMonth = startOfWeek(startOfMonth(currentDate));
+  const lastWeekOfMonth = endOfWeek(endOfMonth(currentDate));
+  const dates = eachDayOfInterval({
+    start: firstWeekOfMonth,
+    end: lastWeekOfMonth,
+  });
 
   dates.forEach(date => {
-    const dateButton = document.createElement('button');
-    dateButton.classList.add('date');
-    dateButton.textContent = date.getDate();
+    const dateEl = document.createElement('button');
+    dateEl.innerText = date.getDate();
+    dateEl.classList.add('date');
     if (!isSameMonth(date, currentDate)) {
-      dateButton.classList.add('date-picker-other-month-date');
-    }
-    if (isSameDay(date, selectedDate)) {
-      dateButton.classList.add('selected');
+      dateEl.classList.add('date-picker-other-month-date');
     }
 
-    dateButton.addEventListener('click', () => {
-      selectedDate = date;
-      datePickerEl.classList.remove('show');
-      currentDate = selectedDate;
-      fillInDays();
+    if (isSameDay(date, selectedDate)) {
+      dateEl.classList.add('selected');
+    }
+
+    dateEl.addEventListener('click', () => {
+      setDate(date);
+      datePicker.classList.remove('show');
     });
-    datePickerDates.appendChild(dateButton);
+
+    datePickerGridDates.appendChild(dateEl);
   });
-  displayDateOnButton(selectedDate);
-  getMonth(currentDate);
-  displayMonth(currentMonth);
 }
 
-// EVENT LISTENERS
-// Toggle the date picker
+// Event Listeners
 datePickerButton.addEventListener('click', () => {
-  datePickerEl.classList.toggle('show');
+  datePicker.classList.toggle('show');
+  const selectedDate = fromUnixTime(datePickerButton.dataset.selectedDate);
+  currentDate = selectedDate;
+  setupDatePicker(selectedDate);
 });
 
 prevMonthButton.addEventListener('click', () => {
-  // Get the previous month when clicked
-  getPreviousMonth();
-  selectedDate = '';
-  // Fill the days of the previous month
-  fillInDays();
+  currentDate = subMonths(currentDate, 1);
+  //   Pass the selectedDate so if the user returns to the selected month the date is shown in blue
+  const selectedDate = fromUnixTime(datePickerButton.dataset.selectedDate);
+  setupDatePicker(selectedDate);
 });
 
 nextMonthButton.addEventListener('click', () => {
-  // Get the next month when clicked
-  getNextMonth();
-  selectedDate = '';
-  // Fill the days of the next month
-  fillInDays();
+  currentDate = addMonths(currentDate, 1);
+  //   Pass the selectedDate so if the user returns to the selected month the date is shown in blue
+  const selectedDate = fromUnixTime(datePickerButton.dataset.selectedDate);
+  setupDatePicker(selectedDate);
 });
 
-// Fill in the dats with the current date
-fillInDays();
+setDate(new Date());
